@@ -3,26 +3,6 @@ pipeline {
     kubernetes {
       label 'nix-agent'
       defaultContainer 'nix'
-      yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:latest
-    tty: true
-  - name: nix
-    image: ghcr.io/akhiljohnchacko/nix-builder:25.05
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: jenkins-workspace
-      mountPath: /home/jenkins/agent
-  volumes:
-  - name: jenkins-workspace
-    emptyDir: {}
-"""
     }
   }
 
@@ -68,3 +48,4 @@ spec:
     }
   }
 }
+
