@@ -12,7 +12,7 @@ spec:
     image: jenkins/inbound-agent:latest
     tty: true
   - name: nix
-    image: nixpkgs/nix:nixos-25.05-x86_64-linux
+    image: ghcr.io/akhiljohnchacko/nix-builder:25.05
     command:
     - cat
     tty: true
