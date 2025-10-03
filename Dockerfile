@@ -1,24 +1,27 @@
+# syntax=docker/dockerfile:1.6
 FROM nixpkgs/nix:nixos-25.05-x86_64-linux
 
-# Enable flakes + nix-command globally
 ENV NIX_CONFIG="experimental-features = nix-command flakes"
+ENV NIXPKGS_PIN="nixpkgs/nixos-25.05"
+ENV NIX_PATH="nixpkgs=channel:nixos-25.05"
 
-RUN nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs \
- && nix-channel --update \
- && nix-env -iA \
-      nixpkgs.jdk17_headless \
-      nixpkgs.cacert \
-      nixpkgs.git \
-      nixpkgs.curl \
-      nixpkgs.coreutils \
-      nixpkgs.tini \
-      nixpkgs.gnupg \
- && ln -sf /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
+# Install required tools + Java (for Jenkins agent injection)
+RUN nix profile install \
+      "${NIXPKGS_PIN}#jdk17_headless" \
+      "${NIXPKGS_PIN}#cacert" \
+      "${NIXPKGS_PIN}#curl" \
+      "${NIXPKGS_PIN}#coreutils" \
+      "${NIXPKGS_PIN}#gnupg" \
+      "${NIXPKGS_PIN}#openssh" \
+      "${NIXPKGS_PIN}#shadow" \
+      "${NIXPKGS_PIN}#tini" \
+      "${NIXPKGS_PIN}#bash"
 
-# Install extra tools you need
-#RUN nix profile install nixpkgs#git \
-#                        nixpkgs#curl \
-#                        nixpkgs#gnupg \
-#                        nixpkgs#tini \
-#                        nixpkgs#bash \
-#                        nixpkgs#coreutils
+# export PATH
+ENV PATH="/root/.nix-profile/bin:${PATH}"
+
+# Tini as init
+ENTRYPOINT ["tini", "--"]
+
+# Keep container alive until Jenkins agent.jar is injected
+CMD ["cat"]
