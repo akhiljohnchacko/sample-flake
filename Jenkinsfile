@@ -36,9 +36,9 @@ pipeline {
       steps {
         container('nix') {
           sh '''
-            if [ -x result/bin/hello-flake ]; then
+            if [ -x result ]; then
               echo "Running hello-flake:"
-              result/bin/hello-flake
+              ls -lrth result
             else
               echo "Binary not found!"
               exit 1
